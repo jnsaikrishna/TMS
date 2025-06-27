@@ -32,6 +32,6 @@ jobs:
     - name: Upload to Testsigma TMS
       run: |
         echo "Uploading result to Testsigma..."
-        curl --location 'https://test-management.testsigma.com/api/v1/projects/19d53abc-74b5-49ad-b551-ac2165cdb6de/junit-import/test-run/TMS-R-20' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJUTVMiLCJzdWIiOiI4M2EyNzNiYS0zYzUyLTQ1OGEtODkyNy1hYWUyMTQ1ZDBjZDYiLCJuYmYiOjE3NTA5OTgwMjIsImlhdCI6MTc1MDk5ODAyMiwiaWRfc2Vzc2lvbl9yZV92YWxpZGF0ZSI6MH0.qhf-rwstajuTWehbhxN22iUZA-Ul2Dr8g1Zu7y9aU0M' \
+        curl --location 'https://test-management.testsigma.com/api/v1/projects/19d53abc-74b5-49ad-b551-ac2165cdb6de/junit-import/test-run/TMS-R-21' \
+--header "Authorization: Bearer $TESTSIGMA_API_TOKEN"\
 --form 'junit_xml=@"/Users/saikrishna.javvadi/jenkins-junit-demo/test-results/TEST-test_sample.SampleTest-20250627094531.xml"'
