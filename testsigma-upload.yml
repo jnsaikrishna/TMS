@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install unittest-xml-reporting
-
+    - uses: actions/checkout@v4.2.0
     - name: Run tests and generate XML report
       run: |
         mkdir -p test-results
