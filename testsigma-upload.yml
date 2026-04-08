@@ -2,7 +2,11 @@ name: Run Tests & Upload to Testsigma
 
 on:
   push:
-    branches: [ main ]  # Or your preferred branch
+    branches: [ main ]
+
+# Future-proof for Node.js 24
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   run-tests:
@@ -13,25 +17,52 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
 
     - name: Install dependencies
       run: |
         pip install unittest-xml-reporting
-    - uses: actions/checkout@v4.2.0
+
     - name: Run tests and generate XML report
       run: |
         mkdir -p test-results
         python3 -m xmlrunner discover -o test-results
 
+    - name: Verify XML files
+      run: |
+        echo "Generated test result files:"
+        ls -l test-results
+
     - name: Upload to Testsigma TMS
       run: |
-        echo "Uploading result to Testsigma..."
-        curl --location 'https://test-management.testsigma.com/api/v1/projects/588d8a8c-cdae-4e44-975c-a58fed8e761f/junit-imports/5f5a892e-594b-4ee3-b5bd-e6cfe194b49e/status' \
---header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJUTVMiLCJzdWIiOiI2ZGU0YmI3MC03ODQxLTQ2NjktYmM4NC1lYmYyOGM1ODY2ZDIiLCJuYmYiOjE3NzU2MjI5MDQsImlhdCI6MTc3NTYyMjkwNCwiaWRfc2Vzc2lvbl9yZV92YWxpZGF0ZSI6MH0.2tA96HYdd28QcMV0MUEaoHrBmgHpDbR9CSsNAJGF7Bw' \
---header 'Content-Type: application/json'
+        echo "Uploading results to Testsigma..."
+
+        for file in test-results/*.xml; do
+          echo "Uploading $file"
+
+          response=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
+            --location 'https://test-management.testsigma.com/api/v1/projects/588d8a8c-cdae-4e44-975c-a58fed8e761f/junit-import/test-run/DTP-R-104' \
+            --header "Authorization: Bearer $TESTSIGMA_API_TOKEN" \
+            --form "junit_xml=@$file")
+
+          # Extract body and status
+          body=$(echo "$response" | sed -e 's/HTTPSTATUS\:.*//g')
+          status=$(echo "$response" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+
+          echo "Response Status: $status"
+          echo "Response Body: $body"
+
+          # Fail pipeline if upload fails
+          if [ "$status" -ne 200 ]; then
+            echo "❌ Upload failed for $file"
+            exit 1
+          fi
+        done
+
+    - name: Done
+      run: echo "✅ Tests executed and results uploaded successfully"
