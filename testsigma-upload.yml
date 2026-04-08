@@ -1,4 +1,4 @@
-name: Upload JUnit XML to Testsigma
+name: Upload XML to Testsigma
 
 on:
   workflow_dispatch:
@@ -17,9 +17,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify XML
+        run: |
+          echo "Checking file..."
+          ls -l
+          ls -l 132.xml
+
       - name: Upload to Testsigma
         run: |
           FILE_PATH="$GITHUB_WORKSPACE/132.xml"
+
+          echo "Uploading $FILE_PATH"
 
           curl --location --request POST \
           'https://test-management.testsigma.com/api/v1/projects/588d8a8c-cdae-4e44-975c-a58fed8e761f/junit-import/test-run/DTP-R-104' \
