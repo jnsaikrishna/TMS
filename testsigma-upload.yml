@@ -1,28 +1,24 @@
-name: Upload Manual XML to Testsigma
+- name: Upload to Testsigma (Debug Mode)
+  run: |
+    echo "Uploading XML..."
 
-on:
-  workflow_dispatch:   # manual trigger
+    ls -l 132.xml
+    wc -c 132.xml
 
-jobs:
-  upload:
-    runs-on: ubuntu-latest
+    response=$(curl --location \
+      --write-out "HTTPSTATUS:%{http_code}" \
+      --silent \
+      'https://test-management.testsigma.com/api/v1/projects/588d8a8c-cdae-4e44-975c-a58fed8e761f/junit-import/test-run/DTP-R-104' \
+      --header "Authorization: Bearer $TESTSIGMA_API_TOKEN" \
+      --form "junit_xml=@132.xml")
 
-    env:
-      TESTSIGMA_API_TOKEN: ${{ secrets.TESTSIGMA_API_TOKEN }}
+    body=$(echo "$response" | sed -e 's/HTTPSTATUS\:.*//g')
+    status=$(echo "$response" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    echo "Status: $status"
+    echo "Response: $body"
 
-    - name: Verify XML file
-      run: |
-        echo "Checking files..."
-        ls -l
-
-    - name: Upload to Testsigma
-      run: |
-        echo "Uploading XML..."
-
-        curl --location 'https://test-management.testsigma.com/api/v1/projects/588d8a8c-cdae-4e44-975c-a58fed8e761f/junit-import/test-run/DTP-R-104' \
-        --header "Authorization: Bearer $TESTSIGMA_API_TOKEN" \
-        --form "junit_xml=@132.xml"
+    if [ "$status" -ne 200 ]; then
+      echo "❌ Upload failed"
+      exit 1
+    fi
