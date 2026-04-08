@@ -3,9 +3,6 @@ name: Upload JUnit XML to Testsigma
 on:
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   upload:
     runs-on: ubuntu-latest
@@ -17,23 +14,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify XML file
+      - name: Get full path
         run: |
-          echo "Checking XML file..."
-          ls -l
-          ls -l 132.xml
-          echo "File size:"
-          wc -c 132.xml
+          echo "Workspace: $GITHUB_WORKSPACE"
+          ls -l $GITHUB_WORKSPACE
 
       - name: Upload to Testsigma
         run: |
-          echo "Uploading XML to Testsigma..."
+          FILE_PATH="$GITHUB_WORKSPACE/132.xml"
+
+          echo "Uploading file from: $FILE_PATH"
+          ls -l "$FILE_PATH"
 
           curl --location --request POST \
           'https://test-management.testsigma.com/api/v1/projects/588d8a8c-cdae-4e44-975c-a58fed8e761f/junit-import/test-run/DTP-R-104' \
           --header "Authorization: Bearer $TESTSIGMA_API_TOKEN" \
-          --form "junit_xml=@132.xml" \
+          --form "junit_xml=@$FILE_PATH" \
           --form "type=junit"
-
-      - name: Done
-        run: echo "Upload step completed"
