@@ -1,15 +1,10 @@
-name: Run Tests & Upload to Testsigma
+name: Upload Manual XML to Testsigma
 
 on:
-  push:
-    branches: [ main ]
-
-# Future-proof for Node.js 24
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  workflow_dispatch:   # manual trigger
 
 jobs:
-  run-tests:
+  upload:
     runs-on: ubuntu-latest
 
     env:
@@ -19,50 +14,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
-
-    - name: Install dependencies
+    - name: Verify XML file
       run: |
-        pip install unittest-xml-reporting
+        echo "Checking files..."
+        ls -l
 
-    - name: Run tests and generate XML report
+    - name: Upload to Testsigma
       run: |
-        mkdir -p test-results
-        python3 -m xmlrunner discover -o test-results
+        echo "Uploading XML..."
 
-    - name: Verify XML files
-      run: |
-        echo "Generated test result files:"
-        ls -l test-results
-
-    - name: Upload to Testsigma TMS
-      run: |
-        echo "Uploading results to Testsigma..."
-
-        for file in test-results/*.xml; do
-          echo "Uploading $file"
-
-          response=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
-            --location 'https://test-management.testsigma.com/api/v1/projects/588d8a8c-cdae-4e44-975c-a58fed8e761f/junit-import/test-run/DTP-R-104' \
-            --header "Authorization: Bearer $TESTSIGMA_API_TOKEN" \
-            --form "junit_xml=@$file")
-
-          # Extract body and status
-          body=$(echo "$response" | sed -e 's/HTTPSTATUS\:.*//g')
-          status=$(echo "$response" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-
-          echo "Response Status: $status"
-          echo "Response Body: $body"
-
-          # Fail pipeline if upload fails
-          if [ "$status" -ne 200 ]; then
-            echo "❌ Upload failed for $file"
-            exit 1
-          fi
-        done
-
-    - name: Done
-      run: echo "✅ Tests executed and results uploaded successfully"
+        curl --location 'https://test-management.testsigma.com/api/v1/projects/588d8a8c-cdae-4e44-975c-a58fed8e761f/junit-import/test-run/DTP-R-104' \
+        --header "Authorization: Bearer $TESTSIGMA_API_TOKEN" \
+        --form "junit_xml=@132.xml"
