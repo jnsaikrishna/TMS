@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<testsuites>
+    <testsuite name="Test Plan Sprint 1.5 || Windows Chrome (Real Device)" timestamp="2026-04-02 16:56:00.0" tests="1" failures="1" errors="1" time="51.000">
+        <properties>
+            <property name="Testsigma reports URL" value="https://app.testsigma.com/ui/td/runs/132"/>
+        </properties>
+        <testcase name="Successful Login with Case-Insensitive Username" suitename="Test suite" time="51.761" result="Failed">
+            <failure>Test failed with message:"Major Test step failed .Element &lt;b&gt;"XPATH:copilot-placeholder-xpath-Successful-Login-with-Case-Insensitive-Username-Username-field" &lt;/b&gt; not found in current page.&lt;br&gt; Please visit below page for more details&lt;br&gt; &lt;a class="text-link" href = "https://testsigma.com/docs/troubleshooting/web-apps/issues-with-ui-Identifiers/" target="_blank"&gt;https://testsigma.com/docs/troubleshooting/web-apps/issues-with-ui-Identifiers/&lt;/a&gt; . Check step results for more details.". Please visit the following URL for more details:
+ https://app.testsigma.com/ui/td/runs/132</failure>
+        </testcase>
+        <system-out>For More info on results, visit https://app.testsigma.com/ui/td/runs/132</system-out>
+    </testsuite>
+</testsuites>
